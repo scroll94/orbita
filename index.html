@@ -1,204 +1,168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Галактика</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-<style>
-:root{color-scheme:dark;--bg:#05020d;--vi:#8b5cf6;--cy:#22d3ee;--ma:#ff3ca8;--tx:#ece7ff;--mu:#9d96c8;--gl:rgba(14,8,32,.62);
---f:'Orbitron',system-ui,sans-serif;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;overflow:hidden}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
-canvas:active{cursor:grabbing}
-#ui{position:fixed;inset:0;pointer-events:none}
-h1{position:absolute;left:22px;top:calc(18px + env(safe-area-inset-top,0px));margin:0;font:700 22px var(--f);letter-spacing:.35em;
-background:linear-gradient(90deg,var(--ma),var(--vi),var(--cy));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{position:absolute;left:23px;top:calc(50px + env(safe-area-inset-top,0px));font-size:12px;color:var(--mu);letter-spacing:.08em}
-#nav{position:absolute;left:18px;top:calc(88px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;pointer-events:auto}
-#nav button{all:unset;cursor:pointer;padding:7px 14px;border-radius:99px;font-size:12px;color:var(--tx);background:var(--gl);
-border:1px solid rgba(139,92,246,.35);backdrop-filter:blur(10px);transition:.25s}
-#nav button:hover,#nav button.on{border-color:var(--cy);box-shadow:0 0 14px rgba(34,211,238,.45);transform:translateX(4px)}
-.lb{position:absolute;left:0;top:0;font:500 11px var(--f);letter-spacing:.14em;white-space:nowrap;color:var(--tx);text-shadow:0 0 8px #000,0 0 14px var(--vi);
-margin:22px 0 0;opacity:.85;transition:opacity .4s}
-.lb.h{opacity:1;color:var(--cy)}
-body.f .lb{opacity:0}
-#hint{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:100%;text-align:center;font-size:11px;color:var(--mu);letter-spacing:.06em;padding:0 12px;box-sizing:border-box}
-#panel{position:absolute;right:20px;top:50%;width:360px;max-width:calc(100% - 40px);max-height:78%;overflow:auto;transform:translate(120%,-50%);transition:transform .7s cubic-bezier(.2,.8,.2,1);
-background:var(--gl);backdrop-filter:blur(18px);border:1px solid rgba(139,92,246,.4);border-radius:18px;padding:22px;pointer-events:auto;
-box-shadow:0 0 40px rgba(139,92,246,.25),inset 0 0 30px rgba(34,211,238,.05)}
-body.f #panel{transform:translate(0,-50%)}
-#panel h2{margin:0 0 6px;font:700 24px var(--f);letter-spacing:.12em}
-.tag{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:99px;border:1px solid var(--ma);color:var(--ma);margin-bottom:16px}
-.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}
-.row span:first-child{color:var(--mu)}.row span:last-child{color:var(--cy);font-weight:600;text-align:right}
-#panel p{font-size:13.5px;line-height:1.6;color:#d6d0f5;margin:16px 0}
-#back{all:unset;cursor:pointer;display:block;text-align:center;padding:11px;border-radius:12px;font:500 12px var(--f);letter-spacing:.15em;
-background:linear-gradient(90deg,rgba(255,60,168,.25),rgba(34,211,238,.25));border:1px solid var(--vi);transition:.25s}
-#back:hover{box-shadow:0 0 18px var(--vi)}
-.tabs{display:flex;gap:6px;margin:0 0 14px}
-.tabs button{all:unset;cursor:pointer;flex:1;text-align:center;padding:8px 0;font:500 10.5px var(--f);letter-spacing:.1em;border-radius:10px;border:1px solid rgba(139,92,246,.3);color:var(--mu);transition:.25s}
-.tabs button.on{color:var(--tx);border-color:var(--cy);background:rgba(34,211,238,.12);box-shadow:0 0 12px rgba(34,211,238,.3)}
-.tab{display:none}.tab.on{display:block;animation:in .5s}
-@keyframes in{from{opacity:0;transform:translateY(8px)}}
-.bar{margin:12px 0 0;font-size:12px;color:var(--mu)}.bar i{display:block;height:6px;border-radius:9px;margin-top:5px;background:rgba(255,255,255,.08);overflow:hidden}.bar b{display:block;height:100%;border-radius:9px}
-.card{padding:12px;margin:0 0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);cursor:pointer;transition:.25s}
-.card:hover{border-color:var(--vi)}.card.on{border-color:var(--ma);box-shadow:0 0 16px rgba(255,60,168,.3)}
-.card h4{margin:0 0 5px;font:500 12.5px var(--f);letter-spacing:.06em}.card small{display:none;color:var(--ma);font-size:10px;letter-spacing:.14em;margin-top:7px}.card.on small{display:block}
-.card div{font-size:12.5px;line-height:1.5;color:#cfc8f0}
-@media(max-width:700px){#nav{flex-direction:row;top:auto;bottom:calc(46px + env(safe-area-inset-bottom,0px));left:10px;right:10px;overflow-x:auto}
-#nav button{flex:none}#panel{top:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));right:50%;max-height:52%;transform:translate(50%,130%)}body.f #panel{transform:translate(50%,0)}
-body.f #nav{display:none}}
-</style>
+<title>Орбита — магазин планет</title>
+<meta name="description" content="Восемь придуманных планет галактики Орбита. Выберите мир в живой 3D-галактике и оформите купчую. Демо для хакатона.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="ui">
-<h1>GALAXY</h1><div class="sub">Нажми на светящуюся планету, чтобы осмотреть её</div>
-<div id="nav"></div><div id="labels"></div>
-<div id="hint">ЛКМ — вращать · ПКМ / Shift — сдвиг · колесо — зум · WASD — полёт · Esc — назад</div>
-<div id="panel"><h2 id="pn"></h2><div class="tag" id="pt"></div><div class="tabs"><button>ОБЗОР</button><button>СОБЫТИЯ</button><button>МЕСТА</button></div><div class="tab on"><div id="pr"></div><div id="pb"></div><p id="pd"></p></div><div class="tab" id="t1"></div><div class="tab" id="t2"></div><button id="back">← К ГАЛАКТИКЕ</button></div>
-</div>
+
+<header class="bar">
+  <a class="mark" href="#top">Орбита</a>
+  <nav aria-label="Разделы">
+    <a href="#catalog">Каталог</a>
+    <a href="#planet">Планета</a>
+    <a href="#deed">Купчая</a>
+    <a href="#faq">Вопросы</a>
+  </nav>
+  <a class="bar-act" href="#deed"><span id="barCount">Купчая пуста</span></a>
+</header>
+
+<main id="top">
+  <div class="split">
+    <div class="read">
+
+      <section class="card" aria-labelledby="h1">
+        <div class="stripe" aria-hidden="true"></div>
+        <div class="card-body">
+          <p class="word rv">Орбита</p>
+          <h1 id="h1" class="rv" style="--d:1">Купите себе планету</h1>
+          <p class="lead-s rv" style="--d:2">Целую, с лунами и кольцами. Восемь миров галактики Орбита, от ледяной Глации до тёплой Тихой Гавани. Покрутите галактику, выберите свой мир и оформите на него купчую.</p>
+          <a class="btn rv" style="--d:3" href="#catalog">Выбрать планету</a>
+          <p class="card-links rv" style="--d:4"><a href="#catalog">Все восемь миров</a><a href="#deed">Как оформить</a><a href="#faq">Вопросы</a></p>
+        </div>
+      </section>
+
+      <section class="catalog" id="catalog" aria-labelledby="catH">
+        <h2 id="catH" class="rv">Восемь миров</h2>
+        <p class="sec-lead rv" style="--d:1">Цена указана за планету целиком, со всеми лунами и кольцами. Листайте: галактика сама летит к той, о которой вы читаете.</p>
+        <ol class="rows" id="rows"></ol>
+      </section>
+
+      <section class="show" id="planet" aria-labelledby="pName">
+        <figure class="plate rv">
+          <img id="plateImg" src="assets/trouvelot-jupiter-1880.jpg" width="1920" height="1478" alt="">
+          <figcaption id="plateCap"></figcaption>
+        </figure>
+        <div class="tabs rv" style="--d:1" role="tablist" aria-label="Сведения о планете">
+          <button role="tab" aria-selected="true" aria-controls="tab0" id="t0">Обзор</button>
+          <button role="tab" aria-selected="false" aria-controls="tab1" id="t1" tabindex="-1">События</button>
+          <button role="tab" aria-selected="false" aria-controls="tab2" id="t2" tabindex="-1">Места</button>
+        </div>
+        <h2 id="pName" class="rv" style="--d:2">Нокс-7</h2>
+        <p class="p-type rv" style="--d:2" id="pType"></p>
+        <div class="tab-panels rv" style="--d:3">
+          <div role="tabpanel" id="tab0" aria-labelledby="t0"></div>
+          <div role="tabpanel" id="tab1" aria-labelledby="t1" hidden></div>
+          <div role="tabpanel" id="tab2" aria-labelledby="t2" hidden></div>
+        </div>
+        <div class="acts rv" style="--d:4">
+          <button class="cell cell-ink" id="buyBtn" type="button">Купить</button>
+          <button class="cell cell-tone" id="lookBtn" type="button">Показать в галактике</button>
+        </div>
+      </section>
+
+    </div>
+
+    <aside class="stage" aria-label="Галактика Орбита">
+      <canvas id="sky" aria-label="Трёхмерная галактика Орбита с восемью планетами. Тяните, чтобы повернуть." role="img"></canvas>
+      <div class="stage-cap" aria-live="polite">
+        <p class="stage-name" id="stageName">Галактика Орбита</p>
+        <p class="stage-note" id="stageNote">8 планет на продажу · тяните, чтобы повернуть</p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="sky" aria-labelledby="skyH">
+    <div class="sky-text">
+      <h2 id="skyH" class="rv">Небо настоящее</h2>
+      <p class="rv" style="--d:1">Планеты Орбиты мы придумали. А небо, в котором их хочется искать, вот оно: Млечный Путь над обсерваторией Ассы-Тургень, 2750 метров над морем, в 90 километрах от Алматы.</p>
+      <p class="rv muted" style="--d:2">Девятнадцать секунд одной ночи, снятые с выдержкой.</p>
+    </div>
+    <figure class="sky-film rv" style="--d:1">
+      <video id="film" muted loop playsinline preload="metadata" poster="assets/a-timelapse-of-the-milky-way-s-poster.jpg" width="1920" height="1280" aria-label="Таймлапс: Млечный Путь движется над куполами обсерватории Ассы-Тургень">
+        <source src="assets/a-timelapse-of-the-milky-way-s.webm" type="video/webm">
+      </video>
+      <figcaption>Обсерватория Ассы-Тургень, Казахстан. Таймлапс Astrobond.</figcaption>
+    </figure>
+  </section>
+
+  <section class="deed" id="deed" aria-labelledby="deedH">
+    <div class="deed-text">
+      <h2 id="deedH" class="rv">Купчая за пять минут</h2>
+      <p class="rv" style="--d:1">Планета не переезжает: она остаётся на своей орбите, а у вас остаётся купчая с координатами, именем и правом назвать любую гору. Ваша купчая уже здесь и заполняется сама, пока вы выбираете.</p>
+      <figure class="atlas rv" style="--d:2">
+        <img src="assets/cellarius-harmonia-macrocosmica-planisphaerium-braheum.jpg" width="1920" height="1624" loading="lazy" alt="Гравюра из небесного атласа Целлариуса: система мира по Тихо Браге, планеты на орбитах вокруг Солнца и Земли">
+        <figcaption>Так устройство неба рисовали в 1661 году: атлас Андреаса Целлариуса.</figcaption>
+      </figure>
+    </div>
+    <div class="slip-wrap">
+      <div class="slip rv" style="--d:1">
+        <p class="slip-head">Купчая на планету</p>
+        <div class="slip-rows">
+          <p class="slip-group">Выбор</p>
+          <p class="ln"><span>Планета</span><span id="sPlanet">не выбрана</span></p>
+          <p class="ln"><span>Тип</span><span id="sType">—</span></p>
+          <p class="ln"><span>Расстояние</span><span id="sDist">—</span></p>
+          <p class="slip-group">Осмотр с орбиты</p>
+          <p class="ln"><span>Облёт в галактике</span><span>3 мин</span></p>
+          <p class="ln"><span>Луны в комплекте</span><span id="sMoons">—</span></p>
+          <p class="slip-group">Оформление</p>
+          <p class="ln"><span>Право назвать гору</span><span>включено</span></p>
+          <p class="ln"><span>Цена планеты</span><span id="sPrice">—</span></p>
+        </div>
+        <p class="slip-total"><span>Планета ваша</span><span id="sTotal">5 минут</span></p>
+        <button class="btn btn-accent" id="signBtn" type="button" disabled>Подписать купчую</button>
+        <p class="slip-msg" id="signMsg" aria-live="polite">Сначала выберите планету в каталоге.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq" aria-labelledby="faqH">
+    <div class="faq-text">
+      <h2 id="faqH" class="rv">Вопросы</h2>
+      <ul class="facts rv" style="--d:1">
+        <li>Доставка не нужна: планета остаётся на своей орбите.</li>
+        <li>Купчая готова сразу после подписи.</li>
+        <li>Это демо для хакатона, деньги не списываются.</li>
+      </ul>
+      <div class="acc rv" style="--d:2">
+        <details><summary>Планета правда станет моей?</summary><p>Нет. Орбита придумана, а магазин сделан как демонстрация для хакатона. Купчая шуточная и юридической силы не имеет.</p></details>
+        <details><summary>Можно купить две планеты?</summary><p>В демо купчая оформляется на одну планету. Выберите другую в каталоге, и купчая перепишется на неё.</p></details>
+        <details><summary>Что входит в цену?</summary><p>Планета целиком, все её луны и кольца, право назвать любую гору и место в каталоге Орбиты с вашим именем.</p></details>
+        <details><summary>Почему у планет разная цена?</summary><p>Чем мягче климат и выше обитаемость, тем дороже мир. Тихая Гавань с морями и +22 °C стоит больше лавового Пульсара-Мю.</p></details>
+        <details><summary>Можно ли полететь туда?</summary><p>Только в браузере: в галактике справа можно облететь каждую планету и рассмотреть её места.</p></details>
+      </div>
+      <div class="faq-acts rv" style="--d:3"><a class="btn" href="#catalog">Выбрать планету</a><a class="tlink" href="https://github.com/scroll94/orbita">Галактика Орбита на GitHub</a></div>
+    </div>
+    <div class="faq-pics">
+      <figure class="tall rv">
+        <img src="assets/trouvelot-the-great-comet-of-1881-edit.jpg" width="1920" height="2509" loading="lazy" alt="Рисунок Трувело: Большая комета 1881 года над куполом обсерватории">
+      </figure>
+      <figure class="sq rv" style="--d:2">
+        <img src="assets/the-planet-saturn-from-the-trouvelot-astronomical.jpg" width="1080" height="887" loading="lazy" alt="Рисунок Трувело: Сатурн с кольцами, 1874">
+      </figure>
+      <p class="pics-cap">Большая комета 1881 года и Сатурн: пастели Этьена Трувело.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="credits">Картинки и видео: <a href="https://commons.wikimedia.org/wiki/File:Trouvelot_-_Jupiter_-_1880.jpg">«Юпитер», 1880</a>, <a href="https://commons.wikimedia.org/wiki/File:%C3%89tienne_L%C3%A9opold_Trouvelot,_%E2%80%9CThe_Planet_Saturn,_from_The_Trouvelot_Astronomical_Drawings%E2%80%9D_2006_48_10v1.jpg">«Сатурн»</a>, <a href="https://commons.wikimedia.org/wiki/File:Trouvelot_-_Aurora_Borealis_-_1872.jpg">«Северное сияние», 1872</a>, <a href="https://commons.wikimedia.org/wiki/File:Trouvelot-_The_great_nebula_in_Orion_-_1875.jpg">«Туманность Ориона», 1875</a>, <a href="https://commons.wikimedia.org/wiki/File:Trouvelot_-_The_great_comet_of_1881_-_edit_1.jpg">«Большая комета 1881 года»</a>, <a href="https://commons.wikimedia.org/wiki/File:%C3%89tienne_L%C3%A9opold_Trouvelot,_%E2%80%9CMare_Humorum,_from_The_Trouvelot_Astronomical_Drawings%E2%80%9D_2006_48_6v1.jpg">«Море Влажности»</a> — Этьен Леопольд Трувело, общественное достояние / <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.en">CC0</a>; <a href="https://commons.wikimedia.org/wiki/File:Cellarius_Harmonia_Macrocosmica_-_Planisphaerium_Braheum.jpg">«Planisphaerium Braheum»</a> — Андреас Целлариус, общественное достояние; <a href="https://commons.wikimedia.org/wiki/File:A_timelapse_of_the_Milky_Way%27s_movement_against_the_backdrop_of_the_Assy-Turgen_Observatory_at_an_altitude_of_2,750_m._Kazakhstan.webm">таймлапс над Ассы-Тургенем</a> — Astrobond, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>. Всё через Wikimedia Commons.</p>
+  <div class="foot-line">
+    <span>Орбита — магазин придуманных планет</span>
+    <span class="foot-links"><a href="#catalog">Каталог</a><a href="#deed">Купчая</a><a href="#faq">Вопросы</a></span>
+    <span class="foot-r">2026 · демо для хакатона</span>
+  </div>
+</footer>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-const $=s=>document.querySelector(s),cv=$('#c');
-const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));
-const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,1,.1,2000);S.add(cam);
-cam.add(new THREE.PointLight(0xffffff,1.4,0,0));S.add(new THREE.AmbientLight(0x4a3f7a,.9));
-const AD=THREE.AdditiveBlending,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function glow(rgb){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);
-g.addColorStop(0,`rgba(${rgb},1)`);g.addColorStop(.25,`rgba(${rgb},.45)`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(k)}
-function mark(rgb){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');
-const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,`rgba(${rgb},.9)`);g.addColorStop(.3,`rgba(${rgb},.25)`);g.addColorStop(1,`rgba(${rgb},0)`);
-x.fillStyle=g;x.fillRect(0,0,128,128);x.strokeStyle=`rgb(${rgb})`;x.lineWidth=3;x.beginPath();x.arc(64,64,30,0,7);x.stroke();return new THREE.CanvasTexture(k)}
-function ptex(c){const k=document.createElement('canvas');k.width=512;k.height=256;const x=k.getContext('2d'),g=x.createLinearGradient(0,0,0,256);
-g.addColorStop(0,c[0]);g.addColorStop(.5,c[1]);g.addColorStop(1,c[2]);x.fillStyle=g;x.fillRect(0,0,512,256);
-for(let i=0;i<80;i++){x.globalAlpha=.08+Math.random()*.18;x.fillStyle=c[i%3];x.beginPath();x.ellipse(Math.random()*512,Math.random()*256,40+Math.random()*160,3+Math.random()*24,0,0,7);x.fill()}
-return new THREE.CanvasTexture(k)}
-
-// Галактика
-const G=new THREE.Group();S.add(G);
-const N=90000,pos=new Float32Array(N*3),col=new Float32Array(N*3),A=new THREE.Color('#ff3ca8'),B=new THREE.Color('#8b5cf6'),C=new THREE.Color('#22d3ee'),tc=new THREE.Color();
-for(let i=0;i<N;i++){let x,y,z,t;
-if(i%6==0){const r=Math.pow(Math.random(),2)*6,a=Math.random()*6.283,b=Math.random()*3.14;x=r*Math.sin(b)*Math.cos(a);z=r*Math.sin(b)*Math.sin(a);y=r*Math.cos(b)*.45;t=0}
-else{const r=Math.pow(Math.random(),1.5)*34+.5,a=(i%4)*1.5708+r*.27,q=()=>Math.pow(Math.random(),2.5)*(Math.random()<.5?1:-1)*(.4+r*.07);
-x=Math.cos(a)*r+q();z=Math.sin(a)*r+q();y=q()*.45;t=r/34}
-tc.copy(t<.5?A:B).lerp(t<.5?B:C,t<.5?t*2:(t-.5)*2).multiplyScalar(.45+Math.random()*.8);
-pos.set([x,y,z],i*3);col.set([tc.r,tc.g,tc.b],i*3)}
-const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(pos,3));gg.setAttribute('color',new THREE.BufferAttribute(col,3));
-G.add(new THREE.Points(gg,new THREE.PointsMaterial({size:.32,map:glow('255,255,255'),vertexColors:true,transparent:true,depthWrite:false,blending:AD})));
-const core=new THREE.Sprite(new THREE.SpriteMaterial({map:glow('255,90,190'),blending:AD,transparent:true,depthWrite:false,opacity:.8}));core.scale.set(26,26,1);G.add(core);
-// Фон
-const bp=new Float32Array(3000*3);for(let i=0;i<3000;i++){const v=new THREE.Vector3().randomDirection?0:0;const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1),r=500+Math.random()*400;
-bp.set([r*Math.sin(b)*Math.cos(a),r*Math.cos(b),r*Math.sin(b)*Math.sin(a)],i*3)}
-const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.BufferAttribute(bp,3));
-S.add(new THREE.Points(bg,new THREE.PointsMaterial({size:2.2,map:glow('200,220,255'),transparent:true,depthWrite:false,blending:AD,sizeAttenuation:false})));
-
-// Планеты
-const P=[
-{n:'НОКС-7',t:'Газовый гигант',r:1.2,c:['#6d28d9','#c084fc','#22d3ee'],o:[11,.5,.6],ring:1,rgb:'192,132,252',i:[['Расстояние','11 000 св. лет'],['Температура','−140 °C'],['Спутники','23'],['Сутки','9 часов']],d:'Фиолетовый исполин с бурями размером с континент. Его кольца из ледяных частиц переливаются всеми оттенками сиреневого.'},
-{n:'ЭМБЕР',t:'Пустынный мир',r:.8,c:['#ff3ca8','#fb923c','#fde68a'],o:[16,2.4,-.8],rgb:'251,146,60',i:[['Расстояние','16 000 св. лет'],['Температура','+78 °C'],['Спутники','2'],['Сутки','31 час']],d:'Раскалённая планета, где дюны из красного песка движутся быстрее, чем ветер на Земле. Ночью небо здесь светится розовым.'},
-{n:'ГЛАЦИА',t:'Ледяной мир',r:.9,c:['#22d3ee','#a5f3fc','#e0f2fe'],o:[21,4.1,.9],rgb:'165,243,252',i:[['Расстояние','21 000 св. лет'],['Температура','−95 °C'],['Спутники','5'],['Сутки','18 часов']],d:'Планета, целиком покрытая голубым льдом. Под километровой коркой скрывается тёплый океан.'},
-{n:'ВИРИДА',t:'Океанический мир',r:1,c:['#0ea5e9','#34d399','#e0f2fe'],o:[26,5.2,-.5],rgb:'52,211,153',i:[['Расстояние','26 000 св. лет'],['Температура','+19 °C'],['Спутники','1'],['Сутки','26 часов']],d:'Бирюзовые океаны и плавучие острова-леса. Здесь обнаружены следы примитивной жизни.'},
-{n:'ПУЛЬСАР-МЮ',t:'Лавовая планета',r:.7,c:['#1a0b2e','#ff3ca8','#f43f5e'],o:[8,3.2,.3],rgb:'255,60,168',i:[['Расстояние','8 000 св. лет'],['Температура','+640 °C'],['Спутники','0'],['Сутки','7 часов']],d:'Тёмный мир с реками лавы, светящимися магентой. Близость к ядру галактики делает его самым горячим в округе.'},
-{n:'ОРФЕЯ',t:'Кольцевой гигант',r:1.4,c:['#4338ca','#a78bfa','#f0abfc'],o:[29,1.2,1.2],ring:1,rgb:'167,139,250',i:[['Расстояние','29 000 св. лет'],['Температура','−170 °C'],['Спутники','41'],['Сутки','12 часов']],d:'Спокойный гигант с тройным кольцом. Его 41 спутник образуют настоящую мини-систему.'},
-{n:'КВАРЦ',t:'Кристаллический мир',r:.75,c:['#a21caf','#e879f9','#67e8f9'],o:[14,.2,-1.2],rgb:'232,121,249',i:[['Расстояние','14 000 св. лет'],['Температура','−20 °C'],['Спутники','3'],['Сутки','22 часа']],d:'Поверхность усыпана гигантскими кристаллами, которые переливаются под светом звёзд и поют на ветру.'},
-{n:'ТИХАЯ ГАВАНЬ',t:'Обитаемая планета',r:.95,c:['#059669','#38bdf8','#fef3c7'],o:[23,2.9,.2],rgb:'56,189,248',i:[['Расстояние','23 000 св. лет'],['Температура','+22 °C'],['Спутники','2'],['Сутки','24 часа']],d:'Мягкий климат, зелёные континенты и тёплые моря. Идеальное место для первой колонии.'}];
-const X=[
-{h:[70,3],e:[['⚡','Фиолетовые молнии','Грозы длиной в тысячи километров вспыхивают каждые несколько минут и подсвечивают облака изнутри.','storm'],['🌌','Полярные сияния','Частицы колец падают в атмосферу и рисуют над полюсами зелёные ленты.','aurora'],['☄️','Кольцевой метеопоток','Ледяные обломки колец сыплются на верхние слои атмосферы.','meteor']],pl:[['Око Бури','Центр шторма размером с три Земли. Бушует уже 400 лет.',15,40],['Алмазная Глубина','Слой, где из-за давления идёт дождь из алмазов.',-20,170],['Парящие станции','Плавучие города, дрейфующие над облаками.',35,290]]},
-{h:[60,15],e:[['🌪','Песчаные бури','Стена песка высотой 10 км идёт по планете неделями.','dust'],['☄️','Метеоритный дождь','Планета пересекает пояс астероидов, и небо расчерчено огненными следами.','meteor'],['🔥','Огненные смерчи','Раскалённый воздух закручивается в вихри из искр и пепла.','ember']],pl:[['Долина Стекла','Песок спёкся в зеркальные поля после древнего удара.',-12,70],['Красный Каньон','Расселина глубиной 14 км, на дне которой находят воду.',8,200],['Город-призрак','Руины базы первых колонистов, занесённые дюнами.',25,320]]},
-{h:[35,25],e:[['❄️','Вечная метель','Снег идёт здесь сотни лет подряд, иногда из ледяных кристаллов.','snow'],['🌌','Бирюзовые сияния','Магнитное поле зажигает над полюсами ленты света.','aurora'],['☄️','Комета Ориона','Раз в 300 лет комета проходит рядом и осыпает планету ледяной пылью.','meteor']],pl:[['Хрустальный Собор','Пещера с ледяными колоннами высотой 200 м.',-30,30],['Тёплое Око','Единственный разлом, где подлёдный океан виден без бурения.',5,150],['Станция «Полюс»','Научная база над океаном под километровым льдом.',75,260]]},
-{h:[30,85],e:[['🧪','Кислотные дожди','Испарения планктона превращаются в зелёные кислотные ливни. Острова-леса прячутся под куполами из листвы.','acid'],['🌌','Светящиеся приливы','Биолюминесцентный планктон окрашивает ночное небо в бирюзовый.','aurora'],['⚡','Тропические грозы','Короткие, но мощные грозы каждый вечер.','storm']],pl:[['Плавучий лес','Остров из переплетённых деревьев размером с город.',10,60],['Бездна Лиры','Океанская впадина глубиной 20 км.',-25,170],['Коралловые башни','Живые рифы, выросшие выше гор.',30,280]]},
-{h:[95,0],e:[['🌋','Извержения магмы','Вулканы выбрасывают лаву прямо в космос.','ember'],['⚡','Ионные грозы','Радиация ядра рождает магентовые разряды.','storm'],['☄️','Огненный град','Раскалённые камни падают из пояса вокруг ядра.','meteor']],pl:[['Лавовое Море','Океан магмы шириной 5000 км.',0,50],['Чёрные Шпили','Базальтовые столбы выше Эвереста.',35,180],['Кратер Феникс','Лава бьёт из него фонтаном каждые 6 часов.',-30,300]]},
-{h:[45,5],e:[['🌌','Кольцевые сияния','Частицы колец вспыхивают в атмосфере полярными огнями.','aurora'],['⚡','Аммиачные грозы','Аммиачные облака разряжаются синими молниями.','storm'],['☄️','Осколки лун','Мелкие спутники иногда разрушаются и осыпают орбиту.','meteor']],pl:[['Тройное Кольцо','Три кольца разной яркости, видимые из любой точки.',0,0],['Луна Эхо','Крупнейший спутник, на нём стоит полярная станция.',20,120],['Бездна Аммиака','Океан жидкого аммиака в глубоких слоях.',-40,240]]},
-{h:[40,30],e:[['💎','Поющие ветры','Ветер звенит в кристаллах, звук слышен за сотни километров.','dust'],['✨','Кристальная метель','Осколки взлетают от резонанса и падают обратно.','snow'],['🌌','Радужные сияния','Кристаллы преломляют звёздный свет в небе.','aurora']],pl:[['Хрустальный Лес','Кристаллы высотой с небоскрёб.',15,40],['Пещера Резонанса','Звук здесь усиливается в тысячу раз.',-20,160],['Гора Аметист','Фиолетовая гора из цельного кристалла.',40,270]]},
-{h:[10,95],e:[['🌧','Тёплые ливни','Мягкие дожди каждый вечер питают леса.','rain'],['🌌','Редкие сияния','Раз в год небо над океаном вспыхивает зелёным.','aurora'],['☄️','Звездопад','Каждую осень планета проходит через облако метеоров.','meteor']],pl:[['Столица Гавань','Первый город колонистов на берегу залива.',20,40],['Озеро Зеркало','Идеально гладкое озеро в кратере.',-10,150],['Эхо-горы','Горы со стоячим эхом, которое слышно целую минуту.',35,260]]}];
-P.forEach((p,i)=>Object.assign(p,X[i]));
-const HM=mark('34,211,238'),FX={acid:{c:'#a3ff3c',dir:-1,sp:2.2,n:800},rain:{c:'#7dd3fc',dir:-1,sp:2.4,n:800},storm:{c:'#c084fc',dir:-1,sp:3,n:500,fl:1},snow:{c:'#e0f2fe',dir:-1,sp:.55,n:900},dust:{c:'#fb923c',dir:0,sp:0,n:900,spin:.7},ember:{c:'#ff3ca8',dir:1,sp:.8,n:700},aurora:{c:'#34d399',dir:0,sp:0,n:700,spin:.25,aur:1},meteor:{c:'#fde68a',dir:-1,sp:5,n:160}};
-const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(2700),3));
-const FP=new THREE.Points(fg,new THREE.PointsMaterial({size:.09,map:glow('255,255,255'),transparent:true,depthWrite:false,blending:AD}));FP.frustumCulled=false;FP.visible=false;
-let fx=null,sel=-1,flash=0;
-function tab(n){document.querySelectorAll('.tabs button').forEach((b,i)=>b.classList.toggle('on',i==n));document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i==n))}
-document.querySelectorAll('.tabs button').forEach((b,i)=>b.onclick=()=>tab(i));
-function setFx(k){const p=P[foc];if(k>=0&&fx&&fx.k==k)k=-1;
-document.querySelectorAll('#t1 .card').forEach((c,i)=>c.classList.toggle('on',i==k));p.a.material.color.set(p.c[2]);
-if(k<0){fx=null;FP.visible=false;return}
-const f=FX[p.e[k][3]];fx={k,f,u:[],r:[]};
-for(let i=0;i<f.n;i++){const a=Math.random()*6.283,y=f.aur?(Math.random()<.5?1:-1)*(.75+Math.random()*.2):Math.random()*2-1,q=Math.sqrt(1-y*y);fx.u.push(q*Math.cos(a),y,q*Math.sin(a));fx.r.push(p.r*(1.03+Math.random()*.7))}
-FP.material.color.set(f.c);fg.setDrawRange(0,f.n);p.g.add(FP);FP.visible=true;p.a.material.color.set(f.c)}
-function selPlace(j){sel=j;document.querySelectorAll('#t2 .card').forEach((c,i)=>c.classList.toggle('on',i==j));tab(2)}
-function fill(i){const p=P[i];
-$('#pb').innerHTML=[['Опасность',p.h[0],'#fb923c,#ff3ca8'],['Обитаемость',p.h[1],'#8b5cf6,#34d399']].map(b=>`<div class="bar">${b[0]} · ${b[1]}%<i><b style="width:${b[1]}%;background:linear-gradient(90deg,${b[2]})"></b></i></div>`).join('');
-$('#t1').innerHTML=p.e.map(x=>`<div class="card"><h4>${x[0]} ${x[1]}</h4><div>${x[2]}</div><small>● НАБЛЮДАЕТСЯ СЕЙЧАС</small></div>`).join('');
-$('#t2').innerHTML=p.pl.map(x=>`<div class="card"><h4>📍 ${x[0]}</h4><div>${x[1]}</div></div>`).join('');
-document.querySelectorAll('#t1 .card').forEach((c,k)=>c.onclick=()=>setFx(k));
-document.querySelectorAll('#t2 .card').forEach((c,j)=>c.onclick=()=>selPlace(j));
-tab(0);setFx(0)}
-function FXU(dt,now){P.forEach((p,i)=>p.ps.forEach((s,j)=>{s.visible=i==foc;if(i==foc)s.scale.setScalar(d*(j==sel?.12*(1+Math.sin(now*.008)*.15):.06))}));
-if(foc<0)return;const p=P[foc];
-if(sel>=0){p.ps[sel].getWorldPosition(V);const df=((Math.atan2(cam.position.x-gT.x,cam.position.z-gT.z)-Math.atan2(V.x-gT.x,V.z-gT.z)+9.4248)%6.2832)-3.1416;p.m.rotation.y+=df*Math.min(1,dt*2.5)}
-if(!fx){p.a.material.opacity=.2;return}
-const f=fx.f,a=fg.attributes.position.array,st=f.dir*f.sp*dt*p.r*.4,lo=p.r*1.03,hi=p.r*1.75;
-for(let i=0;i<f.n;i++){let r=fx.r[i]+=st;if(r>hi)r=fx.r[i]=lo;else if(r<lo)r=fx.r[i]=hi;a[i*3]=fx.u[i*3]*r;a[i*3+1]=fx.u[i*3+1]*r;a[i*3+2]=fx.u[i*3+2]*r}
-fg.attributes.position.needsUpdate=true;FP.rotation.y+=dt*(f.spin||0);
-if(f.fl){if(Math.random()<dt*1.6)flash=1;flash*=Math.exp(-dt*7);p.a.material.opacity=.2+flash*.6}else p.a.material.opacity=.2}
-function pickPlace(e){if(foc<0)return -1;const p=P[foc];RC.setFromCamera({x:e.clientX/innerWidth*2-1,y:-e.clientY/innerHeight*2+1},cam);
-const h=RC.intersectObjects(p.ps).filter(x=>{x.object.getWorldPosition(V);return V.sub(gT).dot(W.copy(cam.position).sub(gT))>0});return h.length?h[0].object.userData.j:-1}
-const mk=[],nav=$('#nav'),lbs=$('#labels');
-P.forEach((p,i)=>{const g=new THREE.Group();g.position.set(Math.cos(p.o[1])*p.o[0],p.o[2],Math.sin(p.o[1])*p.o[0]);
-p.m=new THREE.Mesh(new THREE.SphereGeometry(p.r,48,32),new THREE.MeshStandardMaterial({map:ptex(p.c),roughness:.8,emissive:new THREE.Color(p.c[0]),emissiveIntensity:.18}));
-p.a=new THREE.Mesh(new THREE.SphereGeometry(p.r*1.13,32,24),new THREE.MeshBasicMaterial({color:p.c[2],transparent:true,opacity:.2,side:THREE.BackSide,blending:AD,depthWrite:false}));g.add(p.m,p.a);
-p.ps=p.pl.map((q,j)=>{const la=q[2]*Math.PI/180,lo=q[3]*Math.PI/180,sp=new THREE.Sprite(new THREE.SpriteMaterial({map:HM,blending:AD,transparent:true,depthWrite:false}));
-sp.position.set(Math.cos(la)*Math.cos(lo),Math.sin(la),Math.cos(la)*Math.sin(lo)).multiplyScalar(p.r*1.04);sp.userData.j=j;sp.visible=false;p.m.add(sp);return sp});
-if(p.ring){const rg=new THREE.Mesh(new THREE.RingGeometry(p.r*1.5,p.r*2.4,96),new THREE.MeshBasicMaterial({color:p.c[1],side:2,transparent:true,opacity:.45,depthWrite:false}));rg.rotation.x=1.3;rg.rotation.y=.3;g.add(rg)}
-const s=new THREE.Sprite(new THREE.SpriteMaterial({map:mark(p.rgb),blending:AD,transparent:true,depthTest:false}));s.userData.i=i;g.add(s);mk.push(s);p.g=g;p.s=s;G.add(g);
-p.l=document.createElement('div');p.l.className='lb';p.l.textContent=p.n;lbs.appendChild(p.l);
-p.b=document.createElement('button');p.b.textContent=p.n;p.b.onclick=()=>focus(i);nav.appendChild(p.b)});
-
-// Камера
-const T=new THREE.Vector3(),gT=new THREE.Vector3(),W=new THREE.Vector3(),V=new THREE.Vector3();
-let th=.8,ph=1.15,d=150,gd=52,foc=-1,hov=-1,t0=performance.now();const keys={};
-function focus(i){if(foc>=0)P[foc].a.material.color.set(P[foc].c[2]);fx=null;sel=-1;foc=i;gd=P[i].r*4.8;document.body.classList.add('f');
-$('#pn').textContent=P[i].n;$('#pt').textContent=P[i].t;$('#pd').textContent=P[i].d;
-$('#pr').innerHTML=P[i].i.map(r=>`<div class="row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
-P.forEach((p,j)=>p.b.classList.toggle('on',j==i));fill(i)}
-function out(){if(foc>=0){P[foc].a.material.color.set(P[foc].c[2]);P[foc].a.material.opacity=.2}fx=null;FP.visible=false;sel=-1;foc=-1;gd=52;gT.set(0,0,0);document.body.classList.remove('f');P.forEach(p=>p.b.classList.remove('on'))}
-$('#back').onclick=out;addEventListener('keydown',e=>{if(e.key=='Escape')out();keys[e.key.toLowerCase()]=1});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
-
-// Ввод
-const ptrs=new Map(),RC=new THREE.Raycaster();let moved=0,pd=0;
-const pinch=()=>{const a=[...ptrs.values()];return a.length<2?0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
-function pick(e){RC.setFromCamera({x:e.clientX/innerWidth*2-1,y:-e.clientY/innerHeight*2+1},cam);const h=RC.intersectObjects(mk.filter(s=>s.visible));return h.length?h[0].object.userData.i:-1}
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;pd=pinch()});
-cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);
-if(!p){hov=pick(e);cv.style.cursor=(hov>=0||pickPlace(e)>=0)?'pointer':'grab';return}
-const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
-if(ptrs.size==2){const n=pinch();if(pd)gd=clamp(gd*pd/n,foc>=0?P[foc].r*2.2:4,140);pd=n;moved+=9;return}
-moved+=Math.abs(dx)+Math.abs(dy);
-if((e.buttons&2||e.shiftKey)&&foc<0){V.setFromMatrixColumn(cam.matrix,0);gT.addScaledVector(V,-dx*d*.0016);V.setFromMatrixColumn(cam.matrix,1);gT.addScaledVector(V,dy*d*.0016)}
-else{th-=dx*.006;ph=clamp(ph-dy*.006,.08,3.06)}});
-cv.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId);if(moved<6&&!ptrs.size){const q=pickPlace(e);if(q>=0){selPlace(q);return}const i=pick(e);if(i>=0)focus(i)}});
-cv.addEventListener('pointercancel',e=>ptrs.delete(e.pointerId));
-cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('wheel',e=>{e.preventDefault();gd=clamp(gd*Math.exp(e.deltaY*.0012),foc>=0?P[foc].r*2.2:4,140)},{passive:false});
-function size(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
-addEventListener('resize',size);size();
-
-// Цикл
-function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-t0)/1000,.05);t0=now;
-G.rotation.y+=dt*.012;P.forEach((p,i)=>p.m.rotation.y+=dt*(i==foc?(sel>=0?0:.06):.25));S.updateMatrixWorld();
-if(foc>=0)P[foc].g.getWorldPosition(gT);
-else{if(!ptrs.size)th+=dt*.03;const f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0),r=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
-if(f||r){V.set(T.x-cam.position.x,0,T.z-cam.position.z).normalize();gT.addScaledVector(V,f*d*.7*dt);gT.x+=-V.z*r*d*.7*dt*-1;gT.z+=V.x*r*d*.7*dt*-1}}
-const k=1-Math.exp(-dt*3);T.lerp(gT,k);d+=(gd-d)*k;
-cam.position.set(T.x+d*Math.sin(ph)*Math.cos(th),T.y+d*Math.cos(ph),T.z+d*Math.sin(ph)*Math.sin(th));cam.lookAt(T);
-const pulse=1+Math.sin(now*.003)*.12;
-P.forEach((p,i)=>{p.g.getWorldPosition(W);const dist=W.distanceTo(cam.position),show=foc<0&&dist>p.r*5;
-p.s.visible=show;p.s.scale.setScalar(dist*(i==hov?.095:.07)*pulse);
-V.copy(W).project(cam);const vis=show&&V.z<1;p.l.style.display=vis?'block':'none';
-if(vis){p.l.style.transform=`translate(${(V.x*.5+.5)*innerWidth}px,${(-V.y*.5+.5)*innerHeight}px) translateX(-50%)`;p.l.classList.toggle('h',i==hov)}});
-FXU(dt,now);core.material.opacity=.7+Math.sin(now*.0015)*.1;R.render(S,cam)}
-requestAnimationFrame(loop);
-</script>
+<script src="script.js"></script>
 </body>
 </html>
